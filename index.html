@@ -3,174 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Sphere | Official API Edition</title>
+    <title>Anime Sphere | NextGen Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #ff4d4d; --bg: #0a0a0c; --card: #16161a; }
-        body { background: var(--bg); color: #e4e4e7; font-family: 'Inter', sans-serif; }
-        .glass-nav { background: rgba(10, 10, 12, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .anime-card { background: var(--card); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.05); }
-        .anime-card:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .btn-tab { padding: 8px 16px; border-radius: 99px; font-size: 14px; font-weight: 600; transition: 0.2s; cursor: pointer; opacity: 0.6; }
-        .btn-tab.active { background: var(--accent); color: white; opacity: 1; }
-        #player-modal { display: none; background: rgba(0,0,0,0.98); }
-        .news-item { background: #16161a; border-radius: 16px; padding: 20px; border-left: 4px solid var(--accent); }
+        body { background: var(--bg); color: #e4e4e7; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* Glassmorphism Navigation */
+        .glass-nav { background: rgba(10, 10, 12, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+        
+        /* Anime Cards */
+        .anime-card { background: var(--card); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255,255,255,0.03); }
+        .anime-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 20px 30px -10px rgba(0,0,0,0.5); }
+        
+        /* Tabs */
+        .btn-tab { padding: 10px 20px; border-radius: 99px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; color: rgba(255,255,255,0.5); }
+        .btn-tab.active { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(255,77,77,0.3); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* Shimmer Loading Effect */
         .shimmer { background: linear-gradient(90deg, #16161a 25%, #2a2a30 50%, #16161a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
         @keyframes loading { to { background-position: -200% 0; } }
+
+        #player-modal { display: none; background: rgba(0,0,0,0.98); }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     </style>
 </head>
 <body class="antialiased">
 
-    <nav class="fixed top-0 w-full z-50 glass-nav py-4 px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="text-2xl font-black tracking-tighter text-white">ANIME<span class="text-red-500">SPHERE</span></div>
-        <div class="flex gap-2">
+    <nav class="fixed top-0 w-full z-50 glass-nav py-4 px-6 flex flex-col lg:flex-row justify-between items-center gap-6">
+        <div class="text-2xl font-black tracking-tighter text-white flex items-center gap-2">
+            <span class="bg-red-600 w-8 h-8 flex items-center justify-center rounded-lg text-white">A</span>
+            SPHERE
+        </div>
+        
+        <div class="flex bg-black/40 p-1 rounded-full border border-white/5">
             <div id="tab-main" class="btn-tab active" onclick="changeTab('main')">Главная</div>
-            <div id="tab-top" class="btn-tab" onclick="changeTab('top')">Топ</div>
+            <div id="tab-top" class="btn-tab" onclick="changeTab('top')">Рейтинг</div>
             <div id="tab-news" class="btn-tab" onclick="changeTab('news')">Новости</div>
         </div>
-        <div class="relative w-full max-w-xs">
-            <input id="search" type="text" placeholder="Поиск..." class="w-full bg-white/5 border border-white/10 rounded-full py-2 px-5 outline-none focus:ring-2 ring-red-500/50">
+
+        <div class="relative w-full max-w-sm">
+            <input id="search" type="text" placeholder="Поиск аниме..." 
+                   class="w-full bg-white/5 border border-white/10 rounded-full py-2.5 px-6 outline-none focus:ring-2 ring-red-500/50 transition-all text-sm">
         </div>
     </nav>
 
-    <main class="mt-32 px-6 max-w-7xl mx-auto pb-20">
+    <main class="mt-44 lg:mt-32 px-6 max-w-[1600px] mx-auto pb-24">
         
-        <section id="hero-wrap" class="mb-12">
-            <div class="w-full p-8 rounded-3xl bg-gradient-to-br from-red-900/20 to-zinc-900 border border-white/5 flex flex-col md:flex-row gap-8 items-center">
-                <div id="hero-img" class="w-40 h-40 rounded-2xl overflow-hidden shimmer flex-shrink-0"></div>
+        <section id="hero-wrap" class="mb-16 animate__animated animate__fadeIn">
+            <div class="w-full p-8 rounded-[2rem] bg-gradient-to-br from-red-900/10 via-zinc-900 to-black border border-white/5 flex flex-col md:flex-row gap-10 items-center">
+                <div id="hero-img" class="w-48 h-48 rounded-[1.5rem] overflow-hidden shimmer shadow-2xl flex-shrink-0"></div>
                 <div class="text-center md:text-left flex-1">
-                    <h3 id="hero-name" class="text-3xl font-black mb-2 italic">Загрузка персонажа...</h3>
-                    <p id="hero-desc" class="text-zinc-400 text-sm line-clamp-2 mb-4"></p>
-                    <button onclick="fetchRandomChar()" class="text-xs font-bold bg-white text-black px-4 py-2 rounded-full hover:bg-red-500 hover:text-white transition">СЛЕДУЮЩИЙ →</button>
+                    <span class="text-red-500 text-xs font-bold tracking-[0.3em] uppercase">Персонаж дня</span>
+                    <h3 id="hero-name" class="text-4xl font-black mt-2 mb-4 tracking-tight">Загрузка...</h3>
+                    <p id="hero-desc" class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6 max-w-2xl"></p>
+                    <button onclick="fetchRandomChar()" class="text-xs font-bold bg-white text-black px-8 py-3 rounded-full hover:bg-red-500 hover:text-white transition-all transform hover:scale-105">СЛЕДУЮЩИЙ ГЕРОЙ</button>
                 </div>
             </div>
         </section>
 
-        <h2 id="section-title" class="text-xl font-bold mb-6 flex items-center gap-2">
-            <span class="w-2 h-2 bg-red-500 rounded-full"></span> 
-            Сейчас популярно
-        </h2>
+        <div class="flex items-center gap-4 mb-10">
+            <h2 id="section-title" class="text-2xl font-black uppercase tracking-tighter italic">Сейчас популярно</h2>
+            <div class="h-[1px] flex-1 bg-white/5"></div>
+        </div>
 
-        <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
             </div>
     </main>
 
     <div id="player-modal" class="fixed inset-0 z-[100] flex flex-col animate__animated animate__fadeIn">
-        <div class="p-4 flex justify-between items-center glass-nav">
-            <h4 id="player-title" class="font-bold truncate max-w-md"></h4>
-            <button onclick="closePlayer()" class="bg-white/10 p-2 rounded-full hover:bg-red-500 transition">&times;</button>
+        <div class="p-5 flex justify-between items-center glass-nav">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <h4 id="player-title" class="font-bold text-sm lg:text-base truncate max-w-xs md:max-w-xl text-white"></h4>
+            </div>
+            <button onclick="closePlayer()" class="bg-white/5 p-2 rounded-full hover:bg-red-500 transition-colors group">
+                <svg class="w-6 h-6 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
-        <div class="flex-1 flex items-center justify-center p-4">
-            <div class="w-full max-w-5xl aspect-video rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10">
+        <div class="flex-1 flex items-center justify-center p-2 md:p-10">
+            <div class="w-full h-full max-w-6xl aspect-video rounded-3xl overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.8)] bg-black border border-white/10">
                 <iframe id="player-frame" src="" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        const API_SHIKI = 'https://shikimori.one/api/animes';
-        const API_JIKAN = 'https://api.jikan.moe/v4';
-        const KODIK_TOKEN = '5e20ba06037267f551c6a282f300f83a'; // Публичный токен
+        // API Configuration
+        const SHIKI_BASE = 'https://shikimori.one/api';
+        const JIKAN_BASE = 'https://api.jikan.moe/v4';
+        const KODIK_TOKEN = '5e20ba06037267f551c6a282f300f83a';
 
         const grid = document.getElementById('content-grid');
-        const search = document.getElementById('search');
-        
-        let currentTab = 'main';
+        const searchInput = document.getElementById('search');
+        let activeTab = 'main';
 
-        // 1. Смена вкладок
-        function changeTab(tab) {
-            currentTab = tab;
+        // 1. Tab Management
+        async function changeTab(tab) {
+            activeTab = tab;
             document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
             document.getElementById(`tab-${tab}`).classList.add('active');
             
+            // Show/Hide Hero Section
             document.getElementById('hero-wrap').style.display = (tab === 'main') ? 'flex' : 'none';
-            grid.className = (tab === 'news') ? "flex flex-col gap-6" : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6";
+            
+            // Adjust grid layout for News
+            grid.className = (tab === 'news') ? "flex flex-col gap-8 max-w-4xl mx-auto" : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8";
 
             if(tab === 'main') fetchAnime('order=popularity&status=ongoing', 'Сейчас популярно');
-            if(tab === 'top') fetchAnime('order=ranked', 'Лучшее за всё время');
+            if(tab === 'top') fetchAnime('order=ranked', 'Топ лучших тайтлов');
             if(tab === 'news') fetchNews();
         }
 
-        // 2. Получение аниме (Shikimori)
+        // 2. Fetch Anime Data (Shikimori)
         async function fetchAnime(params, title) {
-            document.getElementById('section-title').innerHTML = `<span class="w-2 h-2 bg-red-500 rounded-full"></span> ${title}`;
-            grid.innerHTML = Array(12).fill('<div class="aspect-[3/4] rounded-2xl shimmer"></div>').join('');
+            document.getElementById('section-title').innerText = title;
+            grid.innerHTML = Array(12).fill('<div class="aspect-[3/4] rounded-3xl shimmer"></div>').join('');
             
             try {
-                const res = await fetch(`${API_SHIKI}?limit=24&${params}`);
+                const res = await fetch(`${SHIKI_BASE}/animes?limit=24&${params}`);
                 const data = await res.json();
                 renderAnime(data);
-            } catch (e) { grid.innerHTML = 'Ошибка загрузки данных.'; }
+            } catch (e) { 
+                grid.innerHTML = `<p class="col-span-full text-center text-zinc-600">Ошибка загрузки каталога...</p>`; 
+            }
         }
 
         function renderAnime(data) {
             grid.innerHTML = data.map((a, i) => `
-                <div class="anime-card rounded-2xl p-2 cursor-pointer animate__animated animate__fadeInUp" 
+                <div class="anime-card rounded-[2rem] p-3 cursor-pointer animate__animated animate__fadeInUp" 
                      style="animation-delay: ${i*0.05}s" onclick="openPlayer(${a.id}, '${a.russian || a.name}')">
-                    <div class="relative aspect-[3/4] rounded-xl overflow-hidden mb-3">
-                        <img src="https://shikimori.one${a.image.original}" class="w-full h-full object-cover">
-                        <div class="absolute top-2 right-2 bg-black/80 text-[10px] px-2 py-1 rounded font-bold border border-white/10">★ ${a.score}</div>
+                    <div class="relative aspect-[3/4] rounded-[1.5rem] overflow-hidden mb-4 shadow-xl">
+                        <img src="https://shikimori.one${a.image.original}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="${a.name}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute top-3 right-3 bg-red-600 text-[10px] px-2 py-1 rounded-lg font-black shadow-lg">★ ${a.score}</div>
                     </div>
-                    <div class="text-xs font-bold truncate px-1">${a.russian || a.name}</div>
-                    <div class="text-[10px] text-zinc-500 px-1 mt-1">${a.kind.toUpperCase()} • ${a.episodes_aired || a.episodes || '?'} эп.</div>
+                    <div class="text-sm font-bold truncate px-2 text-white">${a.russian || a.name}</div>
+                    <div class="text-[11px] text-zinc-500 px-2 mt-1 uppercase tracking-widest font-semibold">${a.kind || 'Anime'} • ${a.episodes_aired || a.episodes || '?'} эп.</div>
                 </div>
             `).join('');
         }
 
-        // 3. Получение новостей (Jikan)
+        // 3. Fetch News (Jikan API v4)
         async function fetchNews() {
-            document.getElementById('section-title').innerText = 'Новости индустрии';
-            grid.innerHTML = '<div class="w-full h-20 shimmer rounded-xl"></div>';
+            document.getElementById('section-title').innerText = 'Свежие новости индустрии';
+            grid.innerHTML = Array(3).fill('<div class="w-full h-40 shimmer rounded-3xl"></div>').join('');
             try {
-                const res = await fetch(`${API_JIKAN}/news`);
+                const res = await fetch(`${JIKAN_BASE}/news`);
                 const { data } = await res.json();
-                grid.innerHTML = data.slice(0, 10).map(n => `
-                    <div class="news-item animate__animated animate__fadeInLeft">
-                        <div class="flex justify-between text-[10px] text-red-500 font-bold mb-2 uppercase">
+                grid.innerHTML = data.slice(0, 12).map(n => `
+                    <div class="bg-[#111] p-8 rounded-[2rem] border border-white/5 animate__animated animate__fadeInLeft shadow-2xl">
+                        <div class="flex justify-between text-[10px] text-red-500 font-black mb-4 uppercase tracking-[0.2em]">
                             <span>${n.author_username}</span>
                             <span>${new Date(n.date).toLocaleDateString()}</span>
                         </div>
-                        <h3 class="text-lg font-bold mb-2">${n.title}</h3>
-                        <p class="text-sm text-zinc-400 line-clamp-2">${n.excerpt}</p>
-                        <a href="${n.url}" target="_blank" class="inline-block mt-4 text-xs font-bold border-b border-red-500">ЧИТАТЬ В ИСТОЧНИКЕ</a>
+                        <h3 class="text-xl font-bold mb-4 text-white leading-tight">${n.title}</h3>
+                        <p class="text-sm text-zinc-400 line-clamp-3 mb-6">${n.excerpt}</p>
+                        <a href="${n.url}" target="_blank" class="inline-block text-[10px] font-black bg-white/5 px-4 py-2 rounded-full hover:bg-red-500 transition-colors">ЧИТАТЬ ПОЛНОСТЬЮ</a>
                     </div>
                 `).join('');
-            } catch (e) { grid.innerHTML = 'Не удалось загрузить новости.'; }
+            } catch (e) { grid.innerHTML = 'Новости временно недоступны.'; }
         }
 
-        // 4. Рандомный персонаж
+        // 4. Random Character logic
         async function fetchRandomChar() {
             try {
-                const res = await fetch(`${API_JIKAN}/random/characters`);
+                const res = await fetch(`${JIKAN_BASE}/random/characters`);
                 const { data } = await res.json();
-                document.getElementById('hero-img').innerHTML = `<img src="${data.images.jpg.image_url}" class="w-full h-full object-cover animate__animated animate__fadeIn">`;
+                document.getElementById('hero-img').innerHTML = `<img src="${data.images.jpg.image_url}" class="w-full h-full object-cover animate__animated animate__zoomIn">`;
                 document.getElementById('hero-name').innerText = data.name;
-                document.getElementById('hero-desc').innerText = data.about || "Таинственный персонаж без описания...";
-            } catch (e) {}
+                document.getElementById('hero-desc').innerText = data.about || "Харизматичный персонаж с загадочной судьбой. Подробности ищите в соответствующих тайтлах!";
+            } catch (e) { console.error("Char error"); }
         }
 
-        // 5. Плеер (Kodik API)
+        // 5. Fixed Player Logic (Kodik + Shikicinema Fallback)
         async function openPlayer(shikiId, title) {
             const modal = document.getElementById('player-modal');
             const frame = document.getElementById('player-frame');
-            document.getElementById('player-title').innerText = title;
+            const playerTitle = document.getElementById('player-title');
             
+            playerTitle.innerText = "Ищем видео: " + title;
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
             try {
+                // Метод 1: Попытка через Kodik API
                 const res = await fetch(`https://kodikapi.com/search?token=${KODIK_TOKEN}&shikimori_id=${shikiId}`);
                 const json = await res.json();
-                if(json.results && json.results.length > 0) {
+                
+                if (json.results && json.results.length > 0) {
                     let link = json.results[0].link;
                     frame.src = link.startsWith('//') ? 'https:' + link : link;
+                    playerTitle.innerText = title;
                 } else {
-                    frame.src = `https://shikivideos.github.io/embed.html#id=${shikiId}`;
+                    throw new Error("Kodik not found");
                 }
             } catch (e) {
-                frame.src = `https://shikivideos.github.io/embed.html#id=${shikiId}`;
+                // Метод 2: Запасной стабильный агрегатор Shikicinema
+                console.log("Kodik fail, using Shikicinema...");
+                frame.src = `https://shikicinema.org/embed/${shikiId}`;
+                playerTitle.innerText = title + " (Источник: Shikicinema)";
             }
         }
 
@@ -180,20 +219,26 @@
             document.body.style.overflow = 'auto';
         }
 
-        // Поиск
-        let timer;
-        search.oninput = (e) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                if(e.target.value.length > 2) {
-                    fetchAnime(`search=${encodeURIComponent(e.target.value)}`, `Результаты для: ${e.target.value}`);
+        // 6. Search with Debounce
+        let searchDebounce;
+        searchInput.oninput = (e) => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                const q = e.target.value.trim();
+                if(q.length > 2) {
+                    if(activeTab === 'news') changeTab('main'); // Switch to grid for search
+                    fetchAnime(`search=${encodeURIComponent(q)}`, `Результаты для: ${q}`);
+                } else if (q.length === 0) {
+                    changeTab('main');
                 }
-            }, 600);
+            }, 800);
         };
 
-        // Инициализация
-        changeTab('main');
-        fetchRandomChar();
+        // Init App
+        window.onload = () => {
+            changeTab('main');
+            fetchRandomChar();
+        };
     </script>
 </body>
 </html>
